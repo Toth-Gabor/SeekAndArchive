@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using System.IO;
 
 namespace SeekAndArchive
@@ -15,7 +16,8 @@ namespace SeekAndArchive
             {
                 foreach (FileInfo fi in di.GetFiles())
                 {
-                    if (fileName == fi.Name)
+                    Match m = Regex.Match(fi.Name, fileName);
+                    if (m.Success)
                     {
                         foundFiles.Add(fi);
                     }
@@ -32,7 +34,13 @@ namespace SeekAndArchive
             DirectoryInfo parent = new DirectoryInfo(directory);
             Program p = new Program();
             p.FileSearcher(parent, fileName);
-            
+
+            if (!parent.Exists)
+            {
+                Console.WriteLine("The specified directory does not exist.");
+                return;
+            }
+      
             foreach (var file in foundFiles)
             {
                 Console.WriteLine(file.FullName);
