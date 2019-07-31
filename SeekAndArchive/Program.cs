@@ -12,11 +12,11 @@ namespace SeekAndArchive
 
         static void RecursiveSearch(List<FileInfo> foundFiles, DirectoryInfo currentDirectory, string fileName)
         {
-            Console.WriteLine(currentDirectory.FullName);
             foreach (FileInfo fi in currentDirectory.GetFiles())
             {
                 if (Regex.IsMatch(fi.Name, fileName))
                 {
+                    Console.WriteLine(fi.Name);
                     foundFiles.Add(fi);
                 }
             }
@@ -50,11 +50,10 @@ namespace SeekAndArchive
         {
             foundFiles = new List<FileInfo>();
             watchers = new List<FileSystemWatcher>();
+
             string fileName = args[0];
             string directory = Path.GetFullPath(args[1]);
-
             DirectoryInfo parent = new DirectoryInfo(directory);
-
 
             if (!parent.Exists)
             {
@@ -66,8 +65,16 @@ namespace SeekAndArchive
             RecursiveSearch(foundFiles, parent, fileName);
             Console.WriteLine("Found {0} files.", foundFiles.Count);
 
+            foreach (FileInfo fileInfo in foundFiles)
+            {
+                FileSystemWatcher Watcher = new FileSystemWatcher(fileInfo.DirectoryName, fileInfo.Name);
+                Watcher.Changed += new FileSystemEventHandler(Watcher_Changed);
+                Watcher.Renamed += new RenamedEventHandler(Watcher_Changed);
+                Watcher.Deleted += new FileSystemEventHandler(Watcher_Changed);
+                Watcher.EnableRaisingEvents = true;
+                watchers.Add(Watcher);
+            }
 
-            
             Console.ReadLine();
         }
     }
